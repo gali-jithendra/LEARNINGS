@@ -19,12 +19,12 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install requests
+        run: pip install -r 1_SQL/requirements.txt
 
       - name: Run script
         env:
           LEETCODE_USERNAME: ${{ secrets.LEETCODE_USERNAME }}
-        run: python LEARNINGS/1_SQL/sync.py
+        run: python 1_SQL/sync.py
 
       - name: Commit changes
         run: |

@@ -1,6 +1,7 @@
 import requests
 import os
 import re
+import json
 
 USERNAME = os.environ.get("LEETCODE_USERNAME")
 SESSION = os.environ.get("LEETCODE_SESSION")
@@ -8,12 +9,13 @@ SESSION = os.environ.get("LEETCODE_SESSION")
 headers = {
     "cookie": f"LEETCODE_SESSION={SESSION}",
     "content-type": "application/json",
-    "referer": "https://leetcode.com"
+    "referer": "https://leetcode.com",
+    "origin": "https://leetcode.com",
+    "user-agent": "Mozilla/5.0"
 }
 
 url = "https://leetcode.com/graphql"
 
-# Get recent accepted submissions
 query = """
 query recentAcSubmissions($username: String!) {
   recentAcSubmissionList(username: $username) {
@@ -30,19 +32,22 @@ resp = requests.post(
     json={"query": query, "variables": {"username": USERNAME}},
 )
 
-data = resp.json()["data"]["recentAcSubmissionList"]
+data = resp.json()
+
+print("DEBUG submissions:", data)
+
+subs = data.get("data", {}).get("recentAcSubmissionList", [])
 
 os.makedirs("1_SQL", exist_ok=True)
 
-for item in data:
+for item in subs:
     sub_id = item["id"]
     title = item["title"]
     slug = item["titleSlug"]
 
-    # Fetch submission code
     sub_query = """
-    query submissionDetails($id: Int!) {
-      submissionDetails(submissionId: $id) {
+    query submissionDetails($submissionId: Int!) {
+      submissionDetails(submissionId: $submissionId) {
         code
         lang {
           name
@@ -54,18 +59,19 @@ for item in data:
     sub_resp = requests.post(
         url,
         headers=headers,
-        json={"query": sub_query, "variables": {"id": int(sub_id)}},
+        json={"query": sub_query, "variables": {"submissionId": int(sub_id)}},
     )
 
-    sub_data = sub_resp.json()
+    sub_json = sub_resp.json()
 
-    if not sub_data.get("data"):
+    details = sub_json.get("data", {}).get("submissionDetails")
+
+    if not details:
         continue
 
-    code = sub_data["data"]["submissionDetails"]["code"]
-    lang = sub_data["data"]["submissionDetails"]["lang"]["name"]
+    code = details.get("code", "")
+    lang = details.get("lang", {}).get("name", "")
 
-    # Only SQL problems
     if "SQL" not in lang:
         continue
 
@@ -76,4 +82,4 @@ for item in data:
         f.write(f"-- https://leetcode.com/problems/{slug}/\n\n")
         f.write(code)
 
-print("SQL sync complete")
+print("DONE")

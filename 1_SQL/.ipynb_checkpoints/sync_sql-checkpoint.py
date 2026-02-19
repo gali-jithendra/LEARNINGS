@@ -1,6 +1,5 @@
 import requests
 import os
-import json
 import re
 
 USERNAME = os.environ.get("LEETCODE_USERNAME")
@@ -14,13 +13,13 @@ headers = {
 
 url = "https://leetcode.com/graphql"
 
+# Get recent accepted submissions
 query = """
 query recentAcSubmissions($username: String!) {
   recentAcSubmissionList(username: $username) {
     id
     title
     titleSlug
-    timestamp
   }
 }
 """
@@ -31,42 +30,50 @@ resp = requests.post(
     json={"query": query, "variables": {"username": USERNAME}},
 )
 
-data = resp.json()
+data = resp.json()["data"]["recentAcSubmissionList"]
 
 os.makedirs("1_SQL", exist_ok=True)
 
-for item in data["data"]["recentAcSubmissionList"]:
+for item in data:
+    sub_id = item["id"]
     title = item["title"]
     slug = item["titleSlug"]
 
-    # fetch submission details
+    # Fetch submission code
     sub_query = """
-    query submissionDetails($slug: String!) {
-      question(titleSlug: $slug) {
-        title
-        topicTags {
+    query submissionDetails($id: Int!) {
+      submissionDetails(submissionId: $id) {
+        code
+        lang {
           name
         }
       }
     }
     """
 
-    q = requests.post(
+    sub_resp = requests.post(
         url,
         headers=headers,
-        json={"query": sub_query, "variables": {"slug": slug}},
+        json={"query": sub_query, "variables": {"id": int(sub_id)}},
     )
 
-    qdata = q.json()
+    sub_data = sub_resp.json()
 
-    tags = [t["name"] for t in qdata["data"]["question"]["topicTags"]]
+    if not sub_data.get("data"):
+        continue
 
-    if "Database" not in tags:
+    code = sub_data["data"]["submissionDetails"]["code"]
+    lang = sub_data["data"]["submissionDetails"]["lang"]["name"]
+
+    # Only SQL problems
+    if "SQL" not in lang:
         continue
 
     filename = re.sub(r"[^a-zA-Z0-9]", "_", title) + ".sql"
 
     with open(f"1_SQL/{filename}", "w") as f:
-        f.write(f"-- {title}\n-- https://leetcode.com/problems/{slug}/\n\n-- SQL Solution Placeholder\n")
+        f.write(f"-- {title}\n")
+        f.write(f"-- https://leetcode.com/problems/{slug}/\n\n")
+        f.write(code)
 
-print("Sync complete")
+print("SQL sync complete")

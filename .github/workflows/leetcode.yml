@@ -24,7 +24,8 @@ jobs:
       - name: Run script
         env:
           LEETCODE_USERNAME: ${{ secrets.LEETCODE_USERNAME }}
-        run: python 1_SQL/sync.py
+          LEETCODE_SESSION: ${{ secrets.LEETCODE_SESSION }}
+        run: python 1_SQL/sync_sql.py
 
       - name: Commit changes
         run: |

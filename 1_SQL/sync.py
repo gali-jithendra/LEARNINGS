@@ -23,5 +23,5 @@ variables = {"username": USERNAME}
 response = requests.post(url, json={"query": query, "variables": variables})
 data = response.json()
 
-with open("LEARNINGS/1_SQL/progress.json", "w") as f:
+with open("1_SQL/progress.json", "w") as f:
     f.write(str(data))

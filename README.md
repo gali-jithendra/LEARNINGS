@@ -1,7 +1,7 @@
 # LEARNINGS
 This folder is intended to store all the knowledge I’ve gained and to be used for future reference and revision.   
 
-- LeetCode Profile:[ https://leetcode.com/jithendra/](https://leetcode.com/u/user9843oA/)   
+- LeetCode Profile:[ https://leetcode.com/u/user9843oA/](https://leetcode.com/u/user9843oA/)   
 
 
 ABBREVIATIONS:

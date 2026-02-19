@@ -19,7 +19,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install -r LEARNINGS/1_SQL/requirements.txt
+        run: pip install requests
 
       - name: Run script
         env:

@@ -6,5 +6,5 @@ This folder is intended to store all the knowledge I’ve gained and to be used 
 
 ABBREVIATIONS:
 
-DS - DataScience
+DS - DataScience   
 ML - Machine Learning

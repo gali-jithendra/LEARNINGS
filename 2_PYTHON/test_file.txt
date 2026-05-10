@@ -1,0 +1,25 @@
+distinctCountOver(
+    ifelse(
+        source='actual',
+        {user_id},
+        NULL
+    ),
+    [{snapshot_month_for_monthly_adoption}],
+    PRE_AGG
+)
+/
+distinctCountOver(
+    ifelse(
+        source='launch'
+        AND {launch_date}
+            <= maxOver(
+                {snapshot_day},
+                [],
+                PRE_FILTER
+            ),
+        {user_id},
+        NULL
+    ),
+    [],
+    PRE_FILTER
+)
